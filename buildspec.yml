@@ -7,6 +7,8 @@ phases:
   build:
     commands:
       - printenv
+      - aws sts get-caller-identity
+      - aws sts assume-role --role-arn arn:aws:iam::134071937287:role/service-role/AWSCodePipelineServiceRole-us-west-2-refinery-docs-pipeline --role-session-name pewpew
       - exit 1
       - apt-get update
       - apt-get install -y s3cmd
