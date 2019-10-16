@@ -6,6 +6,8 @@ phases:
       docker: 18
   build:
     commands:
+      - printenv
+      - exit 1
       - apt-get update
       - apt-get install -y s3cmd
       - pip install --upgrade pip
