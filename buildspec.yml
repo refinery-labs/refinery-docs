@@ -7,7 +7,7 @@ phases:
   build:
     commands:
       - apt-get update
-      - apt-get install s3cmd
+      - apt-get install -y s3cmd
       - pip install --upgrade pip
       - pip install -r requirements.txt
       - mkdocs build
