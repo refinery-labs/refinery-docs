@@ -6,16 +6,12 @@ phases:
       docker: 18
   build:
     commands:
-      - apt-get update
-      - apt-get install -y uuid-runtime s3cmd
-      - printenv
-      - aws sts get-caller-identity
       - pip install --upgrade pip
       - pip install -r requirements.txt
       - mkdocs build
   post_build:
     commands:
-      - aws s3 sync ./site/ s3://testrefinerydocs --acl public-read --cache-control public,max-age=600
+      - aws s3 sync ./site/ s3://docs.refinery.io --acl public-read --cache-control public,max-age=600
 artifacts:
     base-directory: .
     files: "**/*"
