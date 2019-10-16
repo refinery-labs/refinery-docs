@@ -6,12 +6,12 @@ phases:
       docker: 18
   build:
     commands:
+      - apt-get update
+      - apt-get install -y uuid-runtime s3cmd
       - printenv
       - aws sts get-caller-identity
       - aws sts assume-role --role-arn arn:aws:iam::134071937287:role/service-role/codebuild-refinery-docs-build-service-role --role-session-name $(uuidgen)
       - exit -1
-      - apt-get update
-      - apt-get install -y s3cmd
       - pip install --upgrade pip
       - pip install -r requirements.txt
       - mkdocs build
