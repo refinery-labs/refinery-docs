@@ -8,7 +8,7 @@ phases:
     commands:
       - printenv
       - aws sts get-caller-identity
-      - aws sts get-session-token
+      - aws sts assume-role --role-arn arn:aws:iam::134071937287:role/service-role/codebuild-refinery-docs-build-service-role --role-session-name $(uuidgen)
       - exit -1
       - apt-get update
       - apt-get install -y s3cmd
