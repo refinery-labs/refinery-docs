@@ -94,25 +94,20 @@ If there are no URL parameters specified the `queryStringParameters` field of th
 
 For JSON data in a POST request to your API endpoint you can find the request body in the `body` key of the block input object.
 
+You can make a JSON `POST` request with the following `curl` command:
+``` bash
+curl https://[YOUR_ENDPOINT_HERE] -X POST -H "Content-Type: application/json" --data '{"number" : 2}'
+```
+
 The following code snippets demonstrate how to get the `number` parameter out of an example JSON POST API request:
 
 ``` python tab="Python 2.7"
 import json
 
-def main(block_input, backpack):
-    # Placeholder for parsed JSON body data
-    body_data = {}
-    
-    # Validate the body exists, parse as JSON if it does.
-    if "body" in block_input and block_input["body"]:
-    	try:
-        	body_data = json.loads(block_input["body"])
-        except ValueError:
-        	pass
-        
+def main(block_input, backpack):    
     # Validate that the user passed us the JSON parameter "number"
     # If not return an error.
-    if not "number" in body_data:
+    if block_input["json"] or not "number" in body_data["json"]:
         return {
             "msg": "You must provide a 'number' parameter for this endpoint!",
             "success": False
@@ -121,26 +116,14 @@ def main(block_input, backpack):
     # Return the number multiplied by two
     return {
         "success": True,
-        "result": (body_data[ "number" ] * 2)
+        "result": (body_data["json"]["number"] * 2)
     }
 ```
 
 ``` javascript tab="Node 8.10"
 async function main(blockInput, backpack) {
-	// Placeholder for parsed JSON body data
-    var bodyData = {};
-    
-    // If the body is set and is JSON, parse it and set bodyData
-    if( blockInput.body ) {
-        try {
-            bodyData = JSON.parse(
-                blockInput.body
-            );
-        } catch( e ) {}
-    }
-    
     // If the 'number' parameter does not exist, return an error
-    if(!("number" in bodyData)) {
+    if(!blockInput.json || !("number" in blockInput.json)) {
         return {
             "success": false,
             "msg": "You must provide a 'number' parameter for this endpoint!"
@@ -150,7 +133,7 @@ async function main(blockInput, backpack) {
     // Return the number multiplied by two
 	return {
 	    "success": true,
-	    "result": (parseInt(bodyData.number) * 2)
+	    "result": (parseInt(blockInput.json.number) * 2)
 	}
 }
 ```
@@ -158,20 +141,8 @@ async function main(blockInput, backpack) {
 ``` php tab="PHP 7.3"
 <?php
 function main($block_input, $backpack) {
-    $body_data = array();
-    
-    // Parse the JSON body if it's set
-    if(array_key_exists("body", $block_input)) {
-        try {
-            $body_data = json_decode(
-                $block_input["body"],
-                true
-            );
-        } catch (Exception $e) {}
-    }
-    
     // Ensure the user has set the "number" parameter
-    if(!array_key_exists("number", $body_data)) {
+    if(!$body_data["json"] || !array_key_exists("number", $body_data)) {
         return array(
             "success" => false,
             "msg" => "You must provide a 'number' parameter for this endpoint!"
@@ -181,7 +152,7 @@ function main($block_input, $backpack) {
     // Return the 'number' paramter multiplied by two
 	return array(
 	    "success" => true,
-	    "result" => (intval($body_data["number"] * 2))
+	    "result" => (intval($body_data["json"]["number"] * 2))
     );
 }
 
@@ -296,12 +267,128 @@ If you need an easy-to-copy example of the full object structure of the request 
 ``` javascript tab="Annotated JSON"
 {
   // The request body data if there was an HTTP body to the request.
-  "body": "{ \"example\": \"json\" }",
+  // You probably don't want to use this field unless you need the raw contents of the request
+  // body. Otherwise use the "form" or "json" fields to get the values of the parameters passed to
+  // this endpoint. Depending on the state of the isBase64Encoded, this field may be base64-encoded.
+  "body": "eyJleGFtcGxlX2pzb25fcGFyYW0iOiAiZXhhbXBsZV9qc29uX3ZhbHVlIn0=",
   // The URL path for the API Endpoint (not including /refinery)
-  "resource": "/postexample",
-  // Metadata about the request
+  "resource": "/replaceme/jellyocelotroach",
+  // A key/value map of the URL parameters passed in the request
+  // The below data comes from a URL like the following:
+  // http://example.com/?url_param=example
+  "queryStringParameters": {
+    "url_param": "example"
+  },
+  // The values of an HTML form. Key is the "name" of the <input> field and the
+  // value is a list of all of the values submitted for that field. This allows you to submit
+  // multiple values for a given <input> field name.
+  "form": {
+    "example_form_parameter": [
+      "example_form_param_value"
+    ]
+  },
+  // The HTTP method the request came in as (useful for when * is specified for HTTP method)
+  "httpMethod": "POST",
+  "stageVariables": null,
+  // Automatically decoded body.
+  "raw_body": "{\"example_json_param\": \"example_json_value\"}",
+  // Similar to queryStringParameters, but the values of the form name keys are
+  // lists of the values (where a URL parameter was set multiple times with the same key).
+  // Example URL: https://example.com/refinery/replaceme/jellyocelotroach?example_param=example_value&example_param=example_value2
+  "multiValueQueryStringParameters": {
+    "example_param": [
+      "example_value",
+      "example_value2"
+    ]
+  },
+  // For RESTful API parameters (not yet implemented in Refinery)
+  "pathParameters": null,
+  // A key/value map of the headers set on the request.
+  // Some of these headers are added by AWS as metadata via one of the
+  // intermediary reverse HTTP proxy servers.
+  "headers": {
+    "Via": "2.0 9ef715d1b9b8a67b762e820aa1b51ded.cloudfront.net (CloudFront)",
+    "CloudFront-Is-Desktop-Viewer": "true",
+    "CloudFront-Is-SmartTV-Viewer": "false",
+    "CloudFront-Forwarded-Proto": "https",
+    "X-Forwarded-For": "127.0.0.1, 52.46.16.70",
+    "CloudFront-Viewer-Country": "US",
+    "Accept": "*/*",
+    "User-Agent": "curl/7.58.0",
+    "X-Amzn-Trace-Id": "Root=1-5da7a783-0f9d90d29df2b77bec79493b",
+    "Host": "a7iwoagx88.execute-api.us-west-2.amazonaws.com",
+    "X-Forwarded-Proto": "https",
+    "X-Amz-Cf-Id": "7v9l-SXWmbYoGnbE9cD5AbtQvnVI9nulv165kFQWEtN80Dh9nm5Oog==",
+    "CloudFront-Is-Tablet-Viewer": "false",
+    "X-Forwarded-Port": "443",
+    "CloudFront-Is-Mobile-Viewer": "false",
+    "content-type": "application/json"
+  },
+  // Automatically decoded JSON body for requests with a JSON body and a header of
+  // "Content-Type: application/json" set.
+  "json": {
+    "example_json_param": "example_json_value"
+  },
+  // The full HTTP path
+  "path": "/refinery/postexample",
+  // A key/value map of headers where the value is an array of all
+  // values for that header name. This is useful for when you have
+  // multiple headers set on a request with the same name and want
+  // the values from all of them.
+  // Some of these headers are added by AWS as metadata via one of the
+  // intermediary reverse HTTP proxy servers.
+  "multiValueHeaders": {
+    "Via": [
+      "2.0 9ef715d1b9b8a67b762e820aa1b51ded.cloudfront.net (CloudFront)"
+    ],
+    "CloudFront-Is-Desktop-Viewer": [
+      "true"
+    ],
+    "CloudFront-Is-SmartTV-Viewer": [
+      "false"
+    ],
+    "CloudFront-Forwarded-Proto": [
+      "https"
+    ],
+    "X-Forwarded-For": [
+      "127.0.0.1, 52.46.16.70"
+    ],
+    "CloudFront-Viewer-Country": [
+      "US"
+    ],
+    "Accept": [
+      "*/*"
+    ],
+    "User-Agent": [
+      "curl/7.58.0"
+    ],
+    "X-Amzn-Trace-Id": [
+      "Root=1-5da7a783-0f9d90d29df2b77bec79493b"
+    ],
+    "Host": [
+      "a7iwoagx88.execute-api.us-west-2.amazonaws.com"
+    ],
+    "X-Forwarded-Proto": [
+      "https"
+    ],
+    "X-Amz-Cf-Id": [
+      "7v9l-SXWmbYoGnbE9cD5AbtQvnVI9nulv165kFQWEtN80Dh9nm5Oog=="
+    ],
+    "CloudFront-Is-Tablet-Viewer": [
+      "false"
+    ],
+    "X-Forwarded-Port": [
+      "443"
+    ],
+    "CloudFront-Is-Mobile-Viewer": [
+      "false"
+    ],
+    "content-type": [
+      "application/json"
+    ]
+  },
   "requestContext": {
-  	// What stage was used (this is always "refinery")
+    // What stage was used (this is always "refinery")
     "stage": "refinery",
     // The full date and time of when the request occurred
     "requestTime": "08/Jul/2019:06:19:05 +0000",
@@ -349,105 +436,6 @@ If you need an easy-to-copy example of the full object structure of the request 
     // Your Refinery managed AWS account ID
     "accountId": "111222333444"
   },
-  // A key/value map of the URL parameters passed in the request
-  // The below data comes from a URL like the following:
-  // http://example.com/?url_param=example
-  "queryStringParameters": {
-    "url_param": "example"
-  },
-  // A key/value map of headers where the value is an array of all
-  // values for that header name. This is useful for when you have
-  // multiple headers set on a request with the same name and want
-  // the values from all of them.
-  // Some of these headers are added by AWS as metadata via one of the
-  // intermediary reverse HTTP proxy servers.
-  "multiValueHeaders": {
-    "Via": [
-      "2.0 3e1333ad4666f388875288877e890589.cloudfront.net (CloudFront)"
-    ],
-    "CloudFront-Is-Desktop-Viewer": [
-      "true"
-    ],
-    "CloudFront-Is-SmartTV-Viewer": [
-      "false"
-    ],
-    "CloudFront-Forwarded-Proto": [
-      "https"
-    ],
-    "X-Forwarded-For": [
-      "127.0.0.2, 70.132.61.152"
-    ],
-    "CloudFront-Viewer-Country": [
-      "US"
-    ],
-    "Accept": [
-      "*/*"
-    ],
-    "User-Agent": [
-      "curl/7.52.1"
-    ],
-    "X-Amzn-Trace-Id": [
-      "Root=1-12345678-7e004456cc33332a6cd44486"
-    ],
-    "Host": [
-      "xxxxxxxxxx.execute-api.us-west-2.amazonaws.com"
-    ],
-    "X-Forwarded-Proto": [
-      "https"
-    ],
-    "X-Amz-Cf-Id": [
-      "H9oPbEB3enWeeOF2g11qaYUBKhp2UE4oDvlEukAVJuVmVEA7myP6gA=="
-    ],
-    "CloudFront-Is-Tablet-Viewer": [
-      "false"
-    ],
-    "X-Forwarded-Port": [
-      "443"
-    ],
-    "CloudFront-Is-Mobile-Viewer": [
-      "false"
-    ],
-    "content-type": [
-      "application/json"
-    ]
-  },
-  // A key/value map of URL parameters where the value is an array of all
-  // values for that URL parameter name. This is useful for when you have
-  // multiple parameters set on a request with the same name and want the
-  // values from all of them.
-  "multiValueQueryStringParameters": {
-    "url_param": [
-      "example"
-    ]
-  },
-  // For RESTful API parameters (not yet implemented in Refinery)
-  "pathParameters": null,
-  // The HTTP method the request used.
-  "httpMethod": "POST",
-  // A key/value map of the headers set on the request.
-  // Some of these headers are added by AWS as metadata via one of the
-  // intermediary reverse HTTP proxy servers.
-  "headers": {
-    "Via": "2.0 3e1333ad4666f388875288877e890589.cloudfront.net (CloudFront)",
-    "CloudFront-Is-Desktop-Viewer": "true",
-    "CloudFront-Is-SmartTV-Viewer": "false",
-    "CloudFront-Forwarded-Proto": "https",
-    "X-Forwarded-For": "136.25.14.44, 70.132.61.152",
-    "CloudFront-Viewer-Country": "US",
-    "Accept": "*/*",
-    "User-Agent": "curl/7.52.1",
-    "X-Amzn-Trace-Id": "Root=1-12345678-7e004456cc33332a6cd44486",
-    "Host": "xxxxxxxxxx.execute-api.us-west-2.amazonaws.com",
-    "X-Forwarded-Proto": "https",
-    "X-Amz-Cf-Id": "H9oPbEB3enWeeOF2g11qaYUBKhp2UE4oDvlEukAVJuVmVEA7myP6gA==",
-    "CloudFront-Is-Tablet-Viewer": "false",
-    "X-Forwarded-Port": "443",
-    "CloudFront-Is-Mobile-Viewer": "false",
-    "content-type": "application/json"
-  },
-  "stageVariables": null,
-  // The URL path for the API Endpoint (not including /refinery)
-  "path": "/postexample",
   // If the body is base64 encoded
   // More information here: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html#api-gateway-simple-proxy-for-lambda-output-format
   "isBase64Encoded": false
@@ -456,45 +444,62 @@ If you need an easy-to-copy example of the full object structure of the request 
 
 ``` javascript tab="Uncommented Raw JSON"
 {
-  "body": "{ \"example\": \"json\" }",
-  "resource": "/postexample",
-  "requestContext": {
-    "stage": "refinery",
-    "requestTime": "08/Jul/2019:06:19:05 +0000",
-    "protocol": "HTTP/1.1",
-    "domainName": "xxxxxxxxxx.execute-api.us-west-2.amazonaws.com",
-    "resourceId": "fmoota",
-    "apiId": "xxxxxxxxxx",
-    "operationName": "HTTP Method",
-    "resourcePath": "/postexample",
-    "httpMethod": "POST",
-    "domainPrefix": "xxxxxxxxxx",
-    "requestId": "49ce8805-a148-11e9-b1ab-fbd3bff4d120",
-    "extendedRequestId": "cff-DHY1vHcFQyQ=",
-    "path": "/refinery/postexample",
-    "requestTimeEpoch": 1562566745950,
-    "identity": {
-      "userArn": null,
-      "principalOrgId": null,
-      "accessKey": null,
-      "caller": null,
-      "userAgent": "curl/7.52.1",
-      "user": null,
-      "cognitoIdentityPoolId": null,
-      "cognitoIdentityId": null,
-      "accountId": null,
-      "cognitoAuthenticationType": null,
-      "sourceIp": "127.0.0.2",
-      "cognitoAuthenticationProvider": null
-    },
-    "accountId": "111222333444"
-  },
+  "body": null,
+  "resource": "/replaceme/jellyocelotroach",
   "queryStringParameters": {
-    "url_param": "example"
+    "example_param": "example_value"
   },
+  "form": null,
+  "httpMethod": "GET",
+  "stageVariables": null,
+  "raw_body": null,
+  "multiValueQueryStringParameters": {
+    "example_param": [
+      "example_value"
+    ]
+  },
+  "pathParameters": null,
+  "headers": {
+    "Accept-Language": "en-US,en;q=0.9",
+    "CloudFront-Viewer-Country": "US",
+    "upgrade-insecure-requests": "1",
+    "X-Amzn-Trace-Id": "Root=1-5da7a68a-3ba8a9ffa04acb5022390a69",
+    "sec-fetch-user": "?1",
+    "CloudFront-Is-Desktop-Viewer": "true",
+    "CloudFront-Is-SmartTV-Viewer": "false",
+    "sec-fetch-site": "none",
+    "sec-fetch-mode": "navigate",
+    "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36",
+    "Host": "a7iwoagx88.execute-api.us-west-2.amazonaws.com",
+    "Cookie": "s_pers=%20s_vnum%3D1572551122355%2526vn%253D1%7C1572551122355%3B%20s_invisit%3Dtrue%7C1569962223339%3B%20s_nr%3D1569960423340-New%7C1577736423340%3B",
+    "CloudFront-Forwarded-Proto": "https",
+    "Accept-Encoding": "gzip, deflate, br",
+    "X-Forwarded-Port": "443",
+    "X-Amz-Cf-Id": "XtSoqvZ1DEU343Qvvgk7pIWtm3byHf_dhuAP4dssVkLdB4WO2cDmjw==",
+    "CloudFront-Is-Tablet-Viewer": "false",
+    "Via": "2.0 19f9923c4e449b92312c8813bf9135f5.cloudfront.net (CloudFront)",
+    "X-Forwarded-For": "127.0.0.1, 127.0.0.1",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3",
+    "X-Forwarded-Proto": "https",
+    "CloudFront-Is-Mobile-Viewer": "false"
+  },
+  "json": null,
+  "path": "/replaceme/jellyocelotroach",
   "multiValueHeaders": {
-    "Via": [
-      "2.0 3e1333ad4666f388875288877e890589.cloudfront.net (CloudFront)"
+    "Accept-Language": [
+      "en-US,en;q=0.9"
+    ],
+    "CloudFront-Viewer-Country": [
+      "US"
+    ],
+    "upgrade-insecure-requests": [
+      "1"
+    ],
+    "X-Amzn-Trace-Id": [
+      "Root=1-5da7a68a-3ba8a9ffa04acb5022390a69"
+    ],
+    "sec-fetch-user": [
+      "?1"
     ],
     "CloudFront-Is-Desktop-Viewer": [
       "true"
@@ -502,73 +507,83 @@ If you need an easy-to-copy example of the full object structure of the request 
     "CloudFront-Is-SmartTV-Viewer": [
       "false"
     ],
-    "CloudFront-Forwarded-Proto": [
-      "https"
+    "sec-fetch-site": [
+      "none"
     ],
-    "X-Forwarded-For": [
-      "127.0.0.2, 70.132.61.152"
-    ],
-    "CloudFront-Viewer-Country": [
-      "US"
-    ],
-    "Accept": [
-      "*/*"
+    "sec-fetch-mode": [
+      "navigate"
     ],
     "User-Agent": [
-      "curl/7.52.1"
-    ],
-    "X-Amzn-Trace-Id": [
-      "Root=1-12345678-7e004456cc33332a6cd44486"
+      "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36"
     ],
     "Host": [
       "xxxxxxxxxx.execute-api.us-west-2.amazonaws.com"
     ],
-    "X-Forwarded-Proto": [
+    "Cookie": [
+      "s_pers=%20s_vnum%3D1572551122355%2526vn%253D1%7C1572551122355%3B%20s_invisit%3Dtrue%7C1569962223339%3B%20s_nr%3D1569960423340-New%7C1577736423340%3B"
+    ],
+    "CloudFront-Forwarded-Proto": [
       "https"
     ],
-    "X-Amz-Cf-Id": [
-      "H9oPbEB3enWeeOF2g11qaYUBKhp2UE4oDvlEukAVJuVmVEA7myP6gA=="
-    ],
-    "CloudFront-Is-Tablet-Viewer": [
-      "false"
+    "Accept-Encoding": [
+      "gzip, deflate, br"
     ],
     "X-Forwarded-Port": [
       "443"
     ],
-    "CloudFront-Is-Mobile-Viewer": [
+    "X-Amz-Cf-Id": [
+      "XtSoqvZ1DEU343Qvvgk7pIWtm3byHf_dhuAP4dssVkLdB4WO2cDmjw=="
+    ],
+    "CloudFront-Is-Tablet-Viewer": [
       "false"
     ],
-    "content-type": [
-      "application/json"
+    "Via": [
+      "2.0 19f9923c4e449b92312c8813bf9135f5.cloudfront.net (CloudFront)"
+    ],
+    "X-Forwarded-For": [
+      "127.0.0.1, 52.46.16.95"
+    ],
+    "Accept": [
+      "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3"
+    ],
+    "X-Forwarded-Proto": [
+      "https"
+    ],
+    "CloudFront-Is-Mobile-Viewer": [
+      "false"
     ]
   },
-  "multiValueQueryStringParameters": {
-    "url_param": [
-      "example"
-    ]
+  "requestContext": {
+    "stage": "refinery",
+    "requestTime": "16/Oct/2019:23:23:54 +0000",
+    "protocol": "HTTP/1.1",
+    "domainName": "xxxxxxxxxx.execute-api.us-west-2.amazonaws.com",
+    "resourceId": "qaw1rd",
+    "apiId": "xxxxxxxxxx",
+    "operationName": "HTTP Method",
+    "resourcePath": "/replaceme/jellyocelotroach",
+    "httpMethod": "GET",
+    "domainPrefix": "xxxxxxxxxx",
+    "requestId": "65eb0793-bff2-4989-b31c-68ac267bb95d",
+    "extendedRequestId": "Brb1oGpXPHcF23w=",
+    "path": "/refinery/replaceme/jellyocelotroach",
+    "requestTimeEpoch": 1571268234323,
+    "identity": {
+      "userArn": null,
+      "principalOrgId": null,
+      "accessKey": null,
+      "caller": null,
+      "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36",
+      "user": null,
+      "cognitoIdentityPoolId": null,
+      "cognitoIdentityId": null,
+      "accountId": null,
+      "cognitoAuthenticationType": null,
+      "sourceIp": "127.0.0.1",
+      "cognitoAuthenticationProvider": null
+    },
+    "accountId": "123410931234"
   },
-  "pathParameters": null,
-  "httpMethod": "POST",
-  "headers": {
-    "Via": "2.0 3e1333ad4666f388875288877e890589.cloudfront.net (CloudFront)",
-    "CloudFront-Is-Desktop-Viewer": "true",
-    "CloudFront-Is-SmartTV-Viewer": "false",
-    "CloudFront-Forwarded-Proto": "https",
-    "X-Forwarded-For": "136.25.14.44, 70.132.61.152",
-    "CloudFront-Viewer-Country": "US",
-    "Accept": "*/*",
-    "User-Agent": "curl/7.52.1",
-    "X-Amzn-Trace-Id": "Root=1-12345678-7e004456cc33332a6cd44486",
-    "Host": "xxxxxxxxxx.execute-api.us-west-2.amazonaws.com",
-    "X-Forwarded-Proto": "https",
-    "X-Amz-Cf-Id": "H9oPbEB3enWeeOF2g11qaYUBKhp2UE4oDvlEukAVJuVmVEA7myP6gA==",
-    "CloudFront-Is-Tablet-Viewer": "false",
-    "X-Forwarded-Port": "443",
-    "CloudFront-Is-Mobile-Viewer": "false",
-    "content-type": "application/json"
-  },
-  "stageVariables": null,
-  "path": "/postexample",
   "isBase64Encoded": false
 }
 ```

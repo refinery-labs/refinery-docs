@@ -16,9 +16,12 @@ Refinery supports a number of different node types, this documentation offers an
 A `Code Block` is a block which will run some code when it is run or transitioned to. Currently `Code Blocks` support the following languages:
 
 * Node 8.10
+* Node 10.16
+* Python 3.6
 * Python 2.7
 * PHP 7.3
 * Go 1.12
+* Ruby 2.6.4
 
 Generally speaking, `Code Blocks` make up the "meat" of a Refinery project. They contain all of the logic of your service and provide functionality that can be exposed by connecting other blocks to them.
 
@@ -30,7 +33,7 @@ For example, say we have two blocks: `Code Block A` and `Code Block B`. Say that
 
 ```python
 # Code Block A
-def main( block_input, context ):
+def main( block_input, backpack ):
     print( "Let's return some data!" )
     return [1,2,3,4,5]
 ```
@@ -38,7 +41,7 @@ def main( block_input, context ):
 And `Code Block B` has the following code:
 ```javascript
 // Code Block B
-async function main( block_input, context ) {
+async function main( block_input, backpack ) {
 	console.log("Let's print out our input:");
 	console.log(block_input);
 	return false;
@@ -74,9 +77,12 @@ You can also use the full screen editor to test and iterate on your scripts. The
 
 * `Block Imported Libraries`: The libraries that should be pulled in for your `Code Block` script. Each language has support for it's own package-manager.
 	* `Python 2.7`: [`pip` packages.](https://pypi.org/)
+	* `Python 3.6`: [`pip` packages.](https://pypi.org/)
 	* `Node 8.10`: [`npm` modules.](https://www.npmjs.com/)
+	* `Node 10.16`: [`npm` modules.](https://www.npmjs.com/)
 	* `PHP 7.3`: [`composer` packages.](https://packagist.org/)
-	* `Go 1.12`: This option is disabled in Go, but you can install packages by simple importing them in your Go script.
+	* `Go 1.12`: This option is disabled in Go, but you can install packages by simply importing them in your Go script.
+	* `Ruby 2.6.4`: [`gem` packages.](https://rubygems.org/)
 
 <video style="width: 100%" playsinlines controls autoplay muted loop>
 	<source src="/blocks/images/adding-library-code-block.webm" type="video/webm" />

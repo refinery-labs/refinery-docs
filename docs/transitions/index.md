@@ -9,6 +9,7 @@ Transitions are a large part of what makes Refinery an extremely powerful platfo
 * [`exception`](#exception)
 * [`fan-out`](#fan-out)
 * [`fan-in`](#fan-in)
+* [`merge`](#merge)
 
 ## `then`
 
@@ -62,3 +63,20 @@ The `fan-in` transition is the sister-transition of the `fan-out` transition. Us
 
 !!! note
 	You can also have multiple nodes chained together before ending in a `fan-in` transition (instead of just a `fan-out` to a `Code Block` node to a `fan-in`). However, if all of the `Code Blocks` do not `fan-in` properly the transition will fail. This can occur in situations such as a `Code Block` reaching its max execution time, for example.
+
+## `merge`
+
+The `merge` translation allows you to merge multiple execution pipelines back together after branching with multiple transitions. The following is an example of a simple `merge` transition:
+
+![Example of a merge transition](images/merge-transition-example.png)
+
+The start of the Refinery pipeline starts with a `Code Block` transitioning to two blocks via a `then` transition. The final `Code Block` titled `Store URL Metadatabase` will be run after the `Screenshot URL` and `Extract Text` Code Block finish executing. The input to the final `Code Block` is an array of the return values of both previous blocks.
+
+`merge` transitions additionally allow for multiple nested levels of merging. The following image is an example of this:
+
+![Example of multi-level merge transition](images/merge-transition-example-2.png)
+
+In this example we can see we do a merge twice, once after the `Screenshot URL` and `Extract Text` `Code Blocks`, and once again after the `Store URL Metadatabase` and the `Get Text Summary` `Code Blocks` complete. This can be done as many times as desired, although it's important to note that a `merge` transition will only work if the number of `merge` transitions match the number of branched transitions. So if you have two `then` transitions from a `Code Block`, you'll have to have two `merge` transitions.
+
+!!! note
+	The order of the returned values in the input array from a merge is non-deterministic.
