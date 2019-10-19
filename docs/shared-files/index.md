@@ -1,8 +1,8 @@
 # Shared Files (Sharing Files Across Multiple Code Blocks)
 
-Often times when building projects in Refinery you'll want to have one shared library across multiple `Code Blocks`. For example, if you have custom libraries you've written, ORM model declarations, config files, etc. Refinery makes it easy to share files across multiple `Code Blocks` with it's Shared Files functionality.
+Often times when building projects in Refinery you'll want to have a shared library across multiple `Code Blocks`. For example, if you have custom libraries you've written, ORM model declarations, config files, etc. Refinery makes it easy to share files across multiple `Code Blocks` with its Shared Files functionality.
 
-Shared Files are unique in Refinery because they can live across multiple `Code Blocks`. When you create a Shared File you must link it to each `Code Block` that you want it to be added to. Once you've added a Shared File to multiple `Code Blocks` you can update the contents of a Shared File and it will be automatically updated across all the blocks it is linked to. All Shared Files which are added to `Code Blocks` are available under the `shared_files` directory (this is in the same directory as your root `Code Block` script).
+Shared Files are unique in Refinery because they can live across multiple `Code Blocks`. When you create a Shared File you must link it to each `Code Block` that you want it to be added to. Once you've added a Shared File to multiple `Code Blocks` you can update the contents of a Shared File and it will be automatically updated across all the blocks it is linked to. All Shared Files which are added to `Code Blocks` are available under the `shared_files/` directory (this is in the same directory as your root `Code Block` script).
 
 ## View a Project's Shared Files
 
