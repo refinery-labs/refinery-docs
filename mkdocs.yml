@@ -1,6 +1,5 @@
 site_name: Refinery Docs
 nav:
-  - Home: "index.md"
   - "Getting Started": "getting-started/index.md"
   - "Blocks": "blocks/index.md"
   - "Transitions": "transitions/index.md"
@@ -11,6 +10,7 @@ nav:
   - "Creating a API Endpoint": "tutorials/api-endpoints/index.md"
   - "Sharing/Forking Your Project": "sharing-projects/index.md"
   - "Using Saved Blocks": "saved-blocks/index.md"
+  - "Project Versioning & Reverting Changes": "project-versions/index.md"
   - "Pricing Details": "pricing/index.md"
   - Tutorials:
     - "Effortless Serverless Map Reduce": "tutorials/fan-out-fan-in/index.md"
