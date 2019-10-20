@@ -9,13 +9,19 @@ nav:
   - "Shared Files (Sharing Files Across Code Blocks)": "shared-files/index.md"
   - "Using Refinery With Your Favorite Editor/IDE (Local File Hot Reloading)": "local-editor/index.md"
   - "Creating a API Endpoint": "tutorials/api-endpoints/index.md"
+  - "Sharing/Forking Your Project": "sharing-projects/index.md"
   - "Using Saved Blocks": "saved-blocks/index.md"
   - "Pricing Details": "pricing/index.md"
   - Tutorials:
     - "Effortless Serverless Map Reduce": "tutorials/fan-out-fan-in/index.md"
     - "Scraping a Million URLs in a Lunch Break": "tutorials/scraping-a-million-urls/index.md"
+  - "<div class=\"side-join-slack\"><img class=\"join-slack-icon\" src=\"/images/slack-icon.png\" /> Need more help? Click here to join our Slack channel!</div>": "https://join.slack.com/t/refinerydevs/shared_invite/enQtNzkxNTgzNDU3MzQ0LTljNzA1NTMxYTQ2ZTdlNzc1MzU4MDkzNmU0Nzg0NDk3NzFmYjgzM2E5ZjA3MmQxZjBlZTI2MTFiNTAxNTIwNTQ"
 theme: material
 markdown_extensions:
   - admonition
   - codehilite
   - pymdownx.superfences
+extra_javascript:
+  - js/main.js
+extra_css:
+  - css/main.css
