@@ -28,7 +28,7 @@ Once you've done so, enter your new Shared File's name under the `New Shared Fil
 	![](images/create-new-shared-file.png)
 </center>
 
-You'll then be presented with an editor for your newly-created Shared File. You can change the file's name and modify it's contents using this editor:
+You'll then be presented with an editor for your newly-created Shared File. You can change the file's name and modify its contents using this editor:
 
 <center>
 	![](images/shared-file-editor.png)
@@ -95,8 +95,6 @@ This opens up the `Code Block Shared File(s)` pane which shows a file tree of th
 	![](images/code-block-shared-file-tree-view.png)
 </center>
 
-In this example, we'll select the `new-shared-file.txt` Shared File. Clicking on this file will open the Shared File editor and display the contents of the file.
-
 Click on the Shared File you want to remove from your `Code Block`, for our example we'll click on `new-shared-file.txt`.
 
 This opens up the Shared File editor for `new-shared-file.txt`, click on the `Edit Shared File Links` button at the bottom of the editor:
@@ -110,6 +108,9 @@ You can then see all of the `Code Blocks` the Shared File is linked to. Find the
 <center>
 	![](images/unlink-shared-file-from-code-block.png)
 </center>
+
+!!! info
+	If you have multiple `Code Blocks` with the same name you can click the `Select Block` button to select the specific block for the listed link. This helps ensure you have the appropriate block.
 
 !!! info
 	Note that this will **not** delete the Shared File but will simply un-link it from the `Code Block`.
