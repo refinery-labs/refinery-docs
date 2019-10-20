@@ -2,3 +2,4 @@ build.sh
 serve.sh
 env/
 site/
+.DS_Store

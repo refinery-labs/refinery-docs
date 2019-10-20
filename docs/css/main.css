@@ -1,0 +1,16 @@
+.side-join-slack {
+  padding: 5px;
+  margin-top: 10px;
+  font-style: italic;
+  font-weight: bold;
+  text-align: center;
+  background-color: #f7f7f7;
+  border-radius: 5px;
+}
+
+.join-slack-icon {
+  width: 32px;
+  height: 32px;
+  float: left;
+  margin-right: 5px;
+}
