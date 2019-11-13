@@ -119,11 +119,60 @@ As an example, if you passed some Block Input Data of `[1,2,3,4,5]` to a `Topic 
 
 ## Queue Block
 
-Creates an queue which can be linked to a `Code Block` in order to trigger the block when something is put onto the queue. A connected `Code Block` will poll the queue for new items and upon finding some will automatically run with the items as input. The number of concurrent `Code Block` executions will automatically increase to meet demand if the items in the queue are not being emptied fast enough. This is "magic scaling" to meet the demand.
+The `Queue Block` makes it easy to process a large number of things without writing any complex threading or concurrency-related code. With Refinery, our platform handles all of the complexity of auto-scaling and concurrency for you.
+
+A `Queue Block` is used with at least two other `Code Blocks`, usually in a diagram like the following:
+
+### Example `Queue Block` Diagram
+
+<center>
+![](images/example-queue-block-diagram.png)
+</center>
+
+### Example `Code Block` to Add Item(s) to the Queue
+
+The block upstream of the `Queue Block` returns an array of items to be added to the queue (`Return Array of Items for Queue` in this case). Unlike traditional cloud queueing systems you don't need to write any API or glue code. You can return an array of 10 items or 10 million items and our platform will handle all the heavy-lifting of doing distributed-inserts to get your items into the queue. The following code is an example of returning items for the `Queue Block`:
+
+```python
+# Example in Python, other languages work essentially the same way.
+def main(block_input, backpack):
+    return_list = []
+    for i in range( 0, 100 ):
+        return_list.append(i)
+    return return_list
+```
+
+!!! note
+	While our platform automatically does the distributed-inserting of items into the queue, you are still charged for the worker execution time taken to do so.
+
+	In the background this works by spawning up a number of concurrent `Code Block` instances to do multi-threaded inserts into the queue. Our custom runtime is designed to do this as cost-efficiently as possible and generally averages ~400 item inserts per second per concurrent instance. Up to 20 concurrent instances will be invoked depending on the size of the returned array of items to be placed into the queue (if you return 10 things, it'll be 1 instance and if you return 1 million things it'll be 20 instances). These instances will continually perform inserts until all of the items have been inserted into the queue. For example, if you return 1000 items it will take ~3 seconds to insert all of them into the queue and you will be charged for that short `Code Block` execution time.
+
+	Generally, if you're processing a large number of items off a queue this additional cost is negligible. We've noted it here for cost-sensitive projects. If you have further questions about this behavior, please reach out to us for more information.
+
+### "Magic" Queue Autoscaling
+
+Once you've placed items into the queue the `Code Block` which is transitioned to from the `Queue Block` will automatically start being invoked with items from the queue. A batch of items is handed as input to the downstream `Code Block` which is adjustable by modifying the `Batch Size` of the `Queue Block`. You can configure a batch size of at least 1 item up to at max 10 items.
+
+Your downstream `Code Block` (`Process Batch of Items from Queue`) in this example) will automatically scale-up if the queue is not emptied by the initial set of invoked instances of your `Code Block`. Your `Code Block` will automatically increase by 60 more concurrent instances every minute that the queue is not emptied by the current set of worker instances. For example, if you place 50,000 items in the queue and it takes ~10 seconds to process an item off the queue (batch size of 1), a run of your deployment will look something like this:
+
+* `[+0 minutes]` ~65 concurrent instances pull and process items off the queue.
+* `[+1 minutes]` ~65 concurrent instances pull and process items off the queue.
+* `[+2 minutes]` ~125 concurrent instances pull and process items off the queue.
+* etc.
+
+This will continue until the queue is emptied. Once the queue is emptied the concurrency will automatically scale down.
+
+All of this auto-scaling happens without the need of any extra code or configuration.
 
 !!! warning
-	It is important to know that having multiple `Code Blocks` connected to a single `Queue Block` will likely not work the way you expect. Since `Code Blocks` operate in a "polling" fashion, the messages will not be split up or duplicated across multiple `Code Blocks` connected to the queue. Instead messages will randomly flow into the connected `Code Blocks` in no structured way. For a simple way to invoke multiple `Code Blocks` with the same input, see the `Topic Block` section.
-	
+	It is important to know that having multiple `Code Blocks` downstream of a single `Queue Block` will likely not work the way you expect. Since `Code Blocks` operate in a "polling" fashion, the messages will not be split up or duplicated across multiple `Code Blocks` connected to the queue. Instead messages will randomly flow into the connected `Code Blocks` in no structured way. For a simple way to invoke multiple `Code Blocks` with the same input, see the `Topic Block` section. The basic rule of thumb is you can have as many `Code Blocks` as you want transitioning to the `Queue Block`, but you can have only `Code Block` transitioning out of the `Queue Block`.
+
+!!! warning
+	While you can return millions of items in an array and have them inserted into the queue, you should return less than ~1GB of total data at a time (this is the raw text size of all of the items in the array). If you need to return more than 1GB of data at a time, please reach out to us and we can upgrade your "transition capacity".
+
+
+For an example of using the `Queue Block` to easily scrape a million URLs, see our ["Scraping a Million URLs in a Lunch Break"](/tutorials/scraping-a-million-urls/) tutorial.
+
 ### Settings
 * `Name`: The name of the `Queue Block`
 * `Batch Size`: The number of messages to pass into the connect `Code Blocks` as JSON-serializable input. This can be up to 10 total messages at a time. This is useful when you want to "batch" your processing to save on computation costs or to speed up processing.
