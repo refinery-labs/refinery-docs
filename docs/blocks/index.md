@@ -155,7 +155,7 @@ Once you've placed items into the queue the `Code Block` which is transitioned t
 
 Your downstream `Code Block` (`Process Batch of Items from Queue`) in this example) will automatically scale-up if the queue is not emptied by the initial set of invoked instances of your `Code Block`. Your `Code Block` will automatically increase by 60 more concurrent instances every minute that the queue is not emptied by the current set of worker instances. For example, if you place 50,000 items in the queue and it takes ~10 seconds to process an item off the queue (batch size of 1), a run of your deployment will look something like this:
 
-* `[+0 minutes]` ~65 concurrent instances pull and process items off the queue.
+* `[+0 minutes]` ~5 concurrent instances pull and process items off the queue.
 * `[+1 minutes]` ~65 concurrent instances pull and process items off the queue.
 * `[+2 minutes]` ~125 concurrent instances pull and process items off the queue.
 * etc.
